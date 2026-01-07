@@ -1,0 +1,5 @@
+source_id,target_id,dependency_type
+billing,crm,uses
+billing,warehouse,feeds
+erp,warehouse,feeds
+crm,warehouse,feeds

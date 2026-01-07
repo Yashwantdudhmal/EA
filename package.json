@@ -1,0 +1,32 @@
+{
+  "name": "ea-lite",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Minimal Electron + React desktop app for application inventory and dependency visualization.",
+  "main": "src/main/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n VITE,ELECTRON -c cyan,green \"vite --host 127.0.0.1 --port 5173 --strictPort\" \"node scripts/dev-electron.mjs\"",
+    "build": "vite build",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^5.16.7",
+    "@mui/material": "^5.16.7",
+    "cytoscape": "^3.30.0",
+    "neo4j-driver": "^5.26.0",
+    "papaparse": "^5.5.3",
+    "react": "^18.3.1",
+    "react-cytoscapejs": "^2.0.0",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.2",
+    "concurrently": "^8.2.2",
+    "electron": "^30.0.0",
+    "vite": "^5.4.8",
+    "wait-on": "^7.2.0"
+  }
+}

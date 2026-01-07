@@ -1,0 +1,5 @@
+id,name,owner,criticality,status
+crm,CRM,Sales Team,high,active
+billing,Billing System,Finance,high,active
+warehouse,Data Warehouse,Analytics,medium,active
+erp,ERP System,Operations,high,active
