@@ -1,5 +1,5 @@
-source_id,target_id,dependency_type
-billing,crm,uses
-billing,warehouse,feeds
-erp,warehouse,feeds
-crm,warehouse,feeds
+source_id,target_id,dependency_type,dependency_strength,dependency_mode
+billing,crm,uses,hard,runtime
+billing,warehouse,feeds,soft,batch
+erp,warehouse,feeds,hard,async
+crm,warehouse,feeds,soft,runtime

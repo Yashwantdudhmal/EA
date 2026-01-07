@@ -11,16 +11,22 @@
     "start": "electron ."
   },
   "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^5.16.7",
-    "@mui/material": "^5.16.7",
+    "@mui/material": "^5.18.0",
+    "@mui/x-data-grid": "^7.29.12",
     "cytoscape": "^3.30.0",
     "neo4j-driver": "^5.26.0",
     "papaparse": "^5.5.3",
+    "immer": "^10.1.1",
+    "html-to-image": "^1.11.11",
     "react": "^18.3.1",
     "react-cytoscapejs": "^2.0.0",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.29.0",
+    "reactflow": "^11.11.4",
+    "zustand": "^4.5.4"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.2",
