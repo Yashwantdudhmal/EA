@@ -1,0 +1,240 @@
+{
+  "registryKind": "componentTypes",
+  "registryVersion": 1,
+  "componentTypes": [
+    {
+      "typeId": "legacy.unknown",
+      "displayName": "Legacy Component",
+      "category": "Legacy",
+      "iconKey": "LG",
+      "allowedParentTypes": [],
+      "allowedChildTypes": [],
+      "allowedEdgeTypes": ["rel.dependsOn", "rel.dataFlow"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["name"],
+        "additionalProperties": true
+      },
+      "version": 1
+    },
+    {
+      "typeId": "app.service",
+      "displayName": "Service",
+      "category": "Application",
+      "iconKey": "SV",
+      "allowedParentTypes": [],
+      "allowedChildTypes": ["integration.api", "data.database", "infra.queue"],
+      "allowedEdgeTypes": ["rel.dependsOn", "rel.dataFlow"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string" }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "app.ui",
+      "displayName": "UI",
+      "category": "Application",
+      "iconKey": "UI",
+      "allowedParentTypes": [],
+      "allowedChildTypes": ["app.service", "integration.api"],
+      "allowedEdgeTypes": ["rel.dependsOn"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "app.application",
+      "displayName": "Application",
+      "category": "Application",
+      "iconKey": "AP",
+      "allowedParentTypes": [],
+      "allowedChildTypes": [],
+      "allowedEdgeTypes": ["rel.dependsOn", "rel.processToApp", "rel.appToTechnology"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string" },
+          "criticality": { "type": "string", "enum": ["Low", "Medium", "High", "Critical", ""] },
+          "lifecycle": { "type": "string", "enum": ["Planned", "Live", "Deprecated", "Retired", ""] },
+          "hosting": { "type": "string" }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "integration.api",
+      "displayName": "API",
+      "category": "Integration",
+      "iconKey": "API",
+      "allowedParentTypes": ["app.service", "app.ui"],
+      "allowedChildTypes": ["app.service", "data.database", "external.saas"],
+      "allowedEdgeTypes": ["rel.dependsOn", "rel.dataFlow"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "protocol": { "type": "string", "enum": ["HTTP", "gRPC", "GraphQL", "Other"] }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "data.database",
+      "displayName": "Database",
+      "category": "Data",
+      "iconKey": "DB",
+      "allowedParentTypes": ["app.service", "integration.api"],
+      "allowedChildTypes": [],
+      "allowedEdgeTypes": ["rel.dataFlow"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "engine": { "type": "string", "enum": ["PostgreSQL", "MySQL", "SQLServer", "MongoDB", "Other"] }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "infra.queue",
+      "displayName": "Queue",
+      "category": "Infrastructure",
+      "iconKey": "MQ",
+      "allowedParentTypes": ["app.service"],
+      "allowedChildTypes": ["app.service"],
+      "allowedEdgeTypes": ["rel.dataFlow"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "external.saas",
+      "displayName": "External SaaS",
+      "category": "External",
+      "iconKey": "EX",
+      "allowedParentTypes": [],
+      "allowedChildTypes": ["app.service", "integration.api"],
+      "allowedEdgeTypes": ["rel.dependsOn", "rel.dataFlow"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "vendor": { "type": "string" }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "ea.businessProcess",
+      "displayName": "Business Process",
+      "category": "Business",
+      "iconKey": "BP",
+      "allowedParentTypes": [],
+      "allowedChildTypes": [],
+      "allowedEdgeTypes": ["rel.processToApp"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "prog.project",
+      "displayName": "Project",
+      "category": "Programme",
+      "iconKey": "PJ",
+      "allowedParentTypes": [],
+      "allowedChildTypes": [],
+      "allowedEdgeTypes": [],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string" },
+          "status": { "type": "string" }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    },
+    {
+      "typeId": "tech.element",
+      "displayName": "Technology Element",
+      "category": "Technology",
+      "iconKey": "TE",
+      "allowedParentTypes": [],
+      "allowedChildTypes": [],
+      "allowedEdgeTypes": ["rel.appToTechnology"],
+      "requiredAttributes": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "schemaVersion": 1,
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "type": { "type": "string" },
+          "vendor": { "type": "string" }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "version": 1
+    }
+  ]
+}

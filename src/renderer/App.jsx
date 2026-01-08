@@ -108,14 +108,11 @@ export default function App({ colorMode }) {
   const stylesheet = useMemo(() => {
     const primary = theme.palette.primary.main;
     const surface = theme.palette.background.paper;
-    const onPrimary = theme.palette.getContrastText(primary);
+    const onSurface = theme.palette.text.primary;
     const edge = alpha(theme.palette.text.primary, 0.38);
-    const directImpact = theme.palette.error.main;
-    const selected = theme.palette.error.dark;
-    const onDirect = theme.palette.getContrastText(directImpact);
-    const indirectImpact = alpha(theme.palette.warning.main, 0.7);
-    const onIndirect = theme.palette.getContrastText(theme.palette.warning.main);
-    const onSelected = theme.palette.getContrastText(selected);
+    const border = theme.palette.divider;
+    const directFill = alpha(theme.palette.error.main, 0.14);
+    const indirectFill = alpha(theme.palette.warning.main, 0.14);
 
     return [
       {
@@ -125,55 +122,55 @@ export default function App({ colorMode }) {
           'text-valign': 'center',
           'text-halign': 'center',
           'text-wrap': 'wrap',
-          'text-max-width': '110px',
-          'text-overflow-wrap': 'ellipsis',
-          'background-color': primary,
-          color: onPrimary,
-          'font-size': 12,
-          'width': 140,
-          'height': 80,
-          'padding': '12px',
-          shape: 'round-rectangle',
+          'text-max-width': '100px',
+          'background-color': surface,
+          color: onSurface,
+          'font-size': 11,
+          'width': 120,
+          'height': 64,
+          'padding': '6px',
+          shape: 'rectangle',
           'border-width': 1,
-          'border-color': alpha(onPrimary, 0.08)
+          'border-color': border
         }
       },
       {
         selector: 'node.impact-direct',
         style: {
-          'background-color': directImpact,
-          color: onDirect
+          'background-color': directFill,
+          'border-color': theme.palette.error.main
         }
       },
       {
         selector: 'node.impact-indirect',
         style: {
-          'background-color': indirectImpact,
-          color: onIndirect
+          'background-color': indirectFill,
+          'border-color': theme.palette.warning.main
         }
       },
       {
         selector: 'node.selected',
         style: {
-          'background-color': selected,
-          color: onSelected
+          'background-color': alpha(primary, 0.12),
+          'border-width': 2,
+          'border-color': primary
         }
       },
       {
         selector: 'edge',
         style: {
-          width: 2,
+          width: 1.5,
           'line-color': edge,
           'target-arrow-color': edge,
           'target-arrow-shape': 'triangle',
           'curve-style': 'bezier',
           label: showLabels ? 'data(label)' : '',
-          'font-size': 11,
+          'font-size': 10,
           'color': theme.palette.text.secondary,
           'text-rotation': 'autorotate',
           'text-background-color': surface,
           'text-background-opacity': 0.9,
-          'text-background-padding': 4,
+          'text-background-padding': 2,
           'text-wrap': 'wrap',
           'text-max-width': '120px'
         }
@@ -317,9 +314,6 @@ export default function App({ colorMode }) {
   const handlePlaceholderCommand = useCallback((command) => {
     const label = PLACEHOLDER_LABELS[command];
     if (!label) {
-      if (command) {
-        console.warn('[menu] unhandled command:', command);
-      }
       return;
     }
     setSnackbar({ open: true, message: `${label} is not available in this build.`, severity: 'info' });
@@ -653,6 +647,13 @@ export default function App({ colorMode }) {
 
   const processMenuCommand = useCallback(
     (command, payload) => {
+      if (!command) return;
+
+      // Studio navigation and Studio-only commands are handled by the router host.
+      if (typeof command === 'string' && command.startsWith('studio:')) {
+        return;
+      }
+
       switch (command) {
         case 'workspace:import-applications':
           handleImportApplications();
@@ -701,6 +702,14 @@ export default function App({ colorMode }) {
           break;
         case 'help:about':
           setSnackbar({ open: true, message: 'Redly Intelligence — EA Lite Desktop (internal build).', severity: 'info' });
+          break;
+        case 'modeling:create-view':
+          setShowDetailsPanel(true);
+          setSnackbar({
+            open: true,
+            message: 'Configure the current impact view and save it from the Details panel.',
+            severity: 'info'
+          });
           break;
         default:
           handlePlaceholderCommand(command);
@@ -958,86 +967,6 @@ export default function App({ colorMode }) {
 
     run();
   }, [filters, hasActiveFilters, allApplications]);
-  useEffect(() => {
-    const api = window?.electronAPI;
-    if (!api?.onMenuCommand) return () => {};
-
-    const unsubscribe = api.onMenuCommand((command, payload) => {
-      switch (command) {
-        case 'workspace:import-applications':
-          handleImportApplications();
-          break;
-        case 'workspace:import-dependencies':
-          handleImportDependencies();
-          break;
-        case 'edit:clear-selection':
-          clearSelection();
-          break;
-        case 'view:reload-data':
-          reloadData();
-          break;
-        case 'view:refresh-graph':
-          refreshGraphView();
-          break;
-        case 'view:reset-layout':
-          resetGraphLayout();
-          break;
-        case 'view:fit-graph':
-          fitGraphToScreen();
-          break;
-        case 'view:zoom-in':
-          zoomGraph(1.2);
-          break;
-        case 'view:zoom-out':
-          zoomGraph(1 / 1.2);
-          break;
-        case 'view:toggle-inventory':
-          setShowInventoryPanel(Boolean(payload));
-          break;
-        case 'view:toggle-graph':
-          setShowGraphPanel(Boolean(payload));
-          break;
-        case 'view:toggle-details':
-          setShowDetailsPanel(Boolean(payload));
-          break;
-        case 'view:toggle-dark-mode':
-          toggleColorMode?.();
-          break;
-        case 'view:toggle-labels':
-          setShowLabels(Boolean(payload));
-          break;
-        case 'view:toggle-grid':
-          setShowGridGuides(Boolean(payload));
-          break;
-        case 'help:about':
-          setSnackbar({ open: true, message: 'Redly Intelligence — EA Lite Desktop (internal build).', severity: 'info' });
-          break;
-        case 'modeling:create-view':
-          setShowDetailsPanel(true);
-          setSnackbar({
-            open: true,
-            message: 'Configure the current impact view and save it from the Details panel.',
-            severity: 'info'
-          });
-          break;
-        default:
-          handlePlaceholderCommand(command);
-      }
-    });
-
-    return unsubscribe;
-  }, [
-    clearSelection,
-    fitGraphToScreen,
-    handleImportApplications,
-    handleImportDependencies,
-    handlePlaceholderCommand,
-    refreshGraphView,
-    reloadData,
-    resetGraphLayout,
-    toggleColorMode,
-    zoomGraph
-  ]);
 
   useEffect(() => {
     if (!showGraphPanel) return;

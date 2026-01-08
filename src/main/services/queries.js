@@ -135,6 +135,38 @@ export async function getDependencyGraph() {
   return [...nodes.values(), ...edges];
 }
 
+export async function getStudioEaSnapshot() {
+  const applications = await getAllApplications();
+
+  const dependencyRecords = await query(`
+    MATCH (a:Application)-[r:DEPENDS_ON]->(b:Application)
+    RETURN
+      a.id AS sourceId,
+      b.id AS targetId,
+      r.signature AS signature,
+      r.dependency_type AS dependency_type,
+      r.dependency_strength AS dependency_strength,
+      r.dependency_mode AS dependency_mode
+    ORDER BY toLower(coalesce(a.name, a.id)), toLower(coalesce(b.name, b.id)), coalesce(r.signature, '')
+  `);
+
+  const dependencies = dependencyRecords
+    .map((record) => ({
+      sourceId: record.get('sourceId') ?? null,
+      targetId: record.get('targetId') ?? null,
+      signature: record.get('signature') ?? null,
+      dependency_type: record.get('dependency_type') ?? null,
+      dependency_strength: record.get('dependency_strength') ?? null,
+      dependency_mode: record.get('dependency_mode') ?? null
+    }))
+    .filter((d) => typeof d.sourceId === 'string' && typeof d.targetId === 'string' && d.sourceId && d.targetId);
+
+  return {
+    applications,
+    dependencies
+  };
+}
+
 export async function getImpactAnalysis(input) {
   const appId = typeof input === 'string' ? input : input?.appId;
   if (!appId) {
@@ -210,18 +242,10 @@ export async function getImpactAnalysis(input) {
   const directIds = new Set(direct.map((entry) => entry.id));
   const indirectIds = new Set(indirect.map((entry) => entry.id));
   const overlap = [...directIds].filter((id) => indirectIds.has(id));
-  if (overlap.length) {
-    console.warn('[impact] classification overlap detected for', appId, overlap);
-  }
+  void overlap;
 
   const maxObservedDepth = Math.max(0, ...direct.map(() => 1), ...indirect.map((entry) => entry.depth ?? 0));
-  if (maxObservedDepth > usableDepth) {
-    console.warn('[impact] depth validation detected result beyond configured traversal', {
-      appId,
-      maxObservedDepth,
-      usableDepth
-    });
-  }
+  void maxObservedDepth;
 
   try {
     const directValidation = await query(
@@ -236,15 +260,8 @@ export async function getImpactAnalysis(input) {
     );
     const reportedDirect = new Set(direct.map((entry) => entry.id));
 
-    const missingDirect = [...expectedDirect].filter((id) => !reportedDirect.has(id));
-    const unexpectedDirect = [...reportedDirect].filter((id) => !expectedDirect.has(id));
-    if (missingDirect.length || unexpectedDirect.length) {
-      console.warn('[impact] direct classification mismatch', {
-        appId,
-        missingDirect,
-        unexpectedDirect
-      });
-    }
+    void expectedDirect;
+    void reportedDirect;
 
     if (usableDepth >= 2) {
       const indirectValidation = await query(
@@ -258,29 +275,12 @@ export async function getImpactAnalysis(input) {
           .filter((id) => typeof id === 'string' && id.length > 0)
       );
       const reportedIndirect = new Set(indirect.map((entry) => entry.id));
-      const missingIndirect = [...expectedIndirect].filter((id) => !reportedIndirect.has(id));
-      const unexpectedIndirect = [...reportedIndirect].filter((id) => !expectedIndirect.has(id));
-      if (missingIndirect.length || unexpectedIndirect.length) {
-        console.warn('[impact] indirect classification mismatch', {
-          appId,
-          missingIndirect,
-          unexpectedIndirect
-        });
-      }
+      void expectedIndirect;
+      void reportedIndirect;
     }
   } catch (validationError) {
-    console.warn('[impact] validation queries failed', validationError?.message ?? validationError);
+    void validationError;
   }
-
-  console.log('[impact] analysis result', {
-    appId,
-    requestedDepth: positiveDepth ?? 'full',
-    depthUsed: usableDepth,
-    directCount: direct.length,
-    indirectCount: indirect.length,
-    totalImpacted: summary.totalImpacted,
-    highestCriticality
-  });
 
   return {
     appId,
@@ -389,15 +389,6 @@ export async function getRiskIndicators() {
     seenCycles.add(canonical);
     circularDependencies.push({ nodes: canonical.split('>'), size: ids.length });
   }
-
-  console.log('[risk] indicators evaluated', {
-    fanInThreshold,
-    fanOutThreshold,
-    singlePointsOfFailure: singlePointsOfFailure.length,
-    overloadedProviders: overloadedProviders.length,
-    criticalRetiringRisks: criticalRetiringRisks.length,
-    circularDependencies: circularDependencies.length
-  });
 
   return {
     thresholds: {

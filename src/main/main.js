@@ -4,13 +4,14 @@ import fs from 'node:fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import * as neo4jService from './services/neo4j.js';
-import { initializeSchema } from './services/schema.js';
+import { EA_CORE_SCHEMA_VERSION, initializeSchema } from './services/schema.js';
 import { importApplications, importDependencies } from './services/importer.js';
 import {
   getAllApplications,
   getDependencyGraph,
   getImpactAnalysis,
   getRiskIndicators,
+  getStudioEaSnapshot,
   searchApplications
 } from './services/queries.js';
 import {
@@ -31,6 +32,15 @@ const __dirname = path.dirname(__filename);
 
 const isDev = !app.isPackaged;
 
+// Keep renderer DevTools console silent in dev.
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
+
+// Keep DevTools console silent in dev mode.
+// This prevents Chromium/DevTools protocol errors related to Autofill.
+app.commandLine.appendSwitch('disable-features', 'Autofill');
+app.commandLine.appendSwitch('disable-logging');
+app.commandLine.appendSwitch('log-level', '3');
+
 let isSelectFileDialogOpen = false;
 let lastSelectFileDialogClosedAt = 0;
 
@@ -46,10 +56,13 @@ function handleIpc(channel, handler) {
       return await handler(event, ...args);
     } catch (error) {
       const message = error?.message ?? String(error);
-      console.error(`[ipc] ${channel} failed:`, message);
       throw error instanceof Error ? error : new Error(message);
     }
   });
+}
+
+function nowIso() {
+  return new Date().toISOString();
 }
 
 function buildApplicationMenu() {
@@ -179,6 +192,10 @@ function buildApplicationMenu() {
           label: 'Architecture Studio',
           accelerator: 'CmdOrCtrl+Shift+A',
           click: () => sendCommandToRenderer('studio:open')
+        },
+        {
+          label: 'Import EA Snapshot into Studio',
+          click: () => sendCommandToRenderer('studio:import-ea-snapshot')
         },
         { type: 'separator' },
         {
@@ -369,13 +386,10 @@ function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL('http://127.0.0.1:5173');
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
     const indexHtmlPath = path.join(app.getAppPath(), 'dist', 'renderer', 'index.html');
     mainWindow.loadFile(indexHtmlPath);
   }
-
-  console.log('[electron] window created');
 }
 
 // IPC Handlers for CSV import
@@ -478,6 +492,23 @@ handleIpc('studio:diagrams:delete', async (_event, id) => {
   return deleteStudioDiagram(id);
 });
 
+handleIpc('studio:ea-snapshot:get', async () => {
+  const importId = crypto.randomUUID();
+  const importedAt = nowIso();
+  const { applications, dependencies } = await getStudioEaSnapshot();
+  return {
+    snapshot: {
+      eaCoreVersion: `schema:${EA_CORE_SCHEMA_VERSION}`,
+      eaCoreTimestamp: importedAt,
+      importId,
+      snapshotId: importId,
+      importedAt
+    },
+    applications,
+    dependencies
+  };
+});
+
 handleIpc('studio:export-json', async (_event, payload = {}) => {
   const name = typeof payload.name === 'string' && payload.name.trim() ? payload.name.trim() : 'diagram';
   const data = payload.data ?? {};
@@ -503,7 +534,7 @@ handleIpc('studio:export-png', async (_event, payload = {}) => {
 
   const prefix = 'data:image/png;base64,';
   if (!dataUrl.startsWith(prefix)) {
-    throw new Error('Invalid PNG payload');
+    return { saved: false, error: 'Invalid PNG payload.' };
   }
 
   const { canceled, filePath } = await dialog.showSaveDialog({
@@ -517,18 +548,27 @@ handleIpc('studio:export-png', async (_event, payload = {}) => {
   }
 
   const base64 = dataUrl.slice(prefix.length);
-  const buffer = Buffer.from(base64, 'base64');
-  await fs.writeFile(filePath, buffer);
-  return { saved: true, filePath };
+  if (!base64) {
+    return { saved: false, error: 'Empty canvas image.' };
+  }
+
+  try {
+    const buffer = Buffer.from(base64, 'base64');
+    if (!buffer?.length) {
+      return { saved: false, error: 'Empty canvas image.' };
+    }
+    await fs.writeFile(filePath, buffer);
+    return { saved: true, filePath };
+  } catch {
+    return { saved: false, error: 'Failed to write PNG file.' };
+  }
 });
 
 app.whenReady().then(async () => {
   try {
-    console.log('[app] starting...');
     await neo4jService.connect();
-    console.log('[app] neo4j connected');
   } catch (err) {
-    console.error('[app] neo4j connection failed:', err.message);
+    // Best-effort: app can still render without Neo4j.
   }
 
   buildApplicationMenu();
@@ -537,9 +577,8 @@ app.whenReady().then(async () => {
 
   try {
     await initializeSchema();
-    console.log('[schema] initialized');
   } catch (err) {
-    console.warn('[neo4j/schema] initialization failed:', err?.message ?? err);
+    // Best-effort only.
   }
 
   app.on('activate', () => {

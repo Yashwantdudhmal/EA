@@ -1,0 +1,14 @@
+/* Zoom-aware canvas styling hooks.
+   The zoom value is written imperatively as --ea-zoom and data-zoom-level on the canvas container. */
+
+[data-zoom-level='low'] .ea-node-secondary {
+  display: none;
+}
+
+[data-zoom-level='low'] .react-flow__handle {
+  opacity: 0.75;
+}
+
+[data-zoom-level='high'] .react-flow__handle {
+  opacity: 1;
+}

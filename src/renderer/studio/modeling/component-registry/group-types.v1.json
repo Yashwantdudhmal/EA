@@ -1,0 +1,130 @@
+{
+  "registryKind": "groupTypes",
+  "registryVersion": 1,
+  "groupTypes": [
+    {
+      "groupTypeId": "group.systemBoundary",
+      "displayName": "System Boundary",
+      "allowedChildGroupTypes": ["group.domain", "group.platform", "group.environment"],
+      "allowedParentGroupTypes": [],
+      "allowedChildComponentTypes": [
+        "app.service",
+        "app.ui",
+        "integration.api",
+        "data.database",
+        "infra.queue",
+        "external.saas",
+        "legacy.unknown"
+      ],
+      "version": 1
+    },
+    {
+      "groupTypeId": "group.domain",
+      "displayName": "Domain",
+      "allowedChildGroupTypes": [],
+      "allowedParentGroupTypes": ["group.systemBoundary", "group.platform", "group.environment"],
+      "allowedChildComponentTypes": ["app.service", "app.ui", "integration.api", "data.database", "infra.queue", "external.saas", "legacy.unknown"],
+      "version": 1
+    },
+    {
+      "groupTypeId": "group.platform",
+      "displayName": "Platform",
+      "allowedChildGroupTypes": ["group.domain"],
+      "allowedParentGroupTypes": ["group.systemBoundary"],
+      "allowedChildComponentTypes": ["app.service", "app.ui", "integration.api", "data.database", "infra.queue", "external.saas", "legacy.unknown"],
+      "version": 1
+    },
+    {
+      "groupTypeId": "group.environment",
+      "displayName": "Environment",
+      "allowedChildGroupTypes": ["group.domain"],
+      "allowedParentGroupTypes": ["group.systemBoundary"],
+      "allowedChildComponentTypes": ["app.service", "app.ui", "integration.api", "data.database", "infra.queue", "external.saas", "legacy.unknown"],
+      "version": 1
+    },
+
+    {
+      "groupTypeId": "ea.catDept",
+      "displayName": "Category / Department",
+      "allowedChildGroupTypes": ["ea.capability"],
+      "allowedParentGroupTypes": [],
+      "allowedChildComponentTypes": [],
+      "version": 1
+    },
+    {
+      "groupTypeId": "ea.capability",
+      "displayName": "Capability",
+      "allowedChildGroupTypes": ["ea.subCapability"],
+      "allowedParentGroupTypes": ["ea.catDept"],
+      "allowedChildComponentTypes": [],
+      "version": 1
+    },
+    {
+      "groupTypeId": "ea.subCapability",
+      "displayName": "Sub-Capability",
+      "allowedChildGroupTypes": [],
+      "allowedParentGroupTypes": ["ea.capability"],
+      "allowedChildComponentTypes": ["ea.businessProcess"],
+      "version": 1
+    },
+
+    {
+      "groupTypeId": "app.catDept",
+      "displayName": "Category / Department",
+      "allowedChildGroupTypes": [],
+      "allowedParentGroupTypes": [],
+      "allowedChildComponentTypes": ["app.application"],
+      "version": 1
+    },
+
+    {
+      "groupTypeId": "prog.catDept",
+      "displayName": "Category / Department",
+      "allowedChildGroupTypes": ["prog.programme"],
+      "allowedParentGroupTypes": [],
+      "allowedChildComponentTypes": [],
+      "version": 1
+    },
+    {
+      "groupTypeId": "prog.programme",
+      "displayName": "Programme",
+      "allowedChildGroupTypes": [],
+      "allowedParentGroupTypes": ["prog.catDept"],
+      "allowedChildComponentTypes": ["prog.project"],
+      "version": 1
+    },
+
+    {
+      "groupTypeId": "tech.layer.infrastructure",
+      "displayName": "Infrastructure Layer",
+      "allowedChildGroupTypes": ["tech.group"],
+      "allowedParentGroupTypes": [],
+      "allowedChildComponentTypes": ["tech.element"],
+      "version": 1
+    },
+    {
+      "groupTypeId": "tech.layer.hostingOps",
+      "displayName": "Application Hosting & Ops",
+      "allowedChildGroupTypes": ["tech.group"],
+      "allowedParentGroupTypes": [],
+      "allowedChildComponentTypes": ["tech.element"],
+      "version": 1
+    },
+    {
+      "groupTypeId": "tech.layer.platformServices",
+      "displayName": "Platform Services",
+      "allowedChildGroupTypes": ["tech.group"],
+      "allowedParentGroupTypes": [],
+      "allowedChildComponentTypes": ["tech.element"],
+      "version": 1
+    },
+    {
+      "groupTypeId": "tech.group",
+      "displayName": "Layer Group",
+      "allowedChildGroupTypes": [],
+      "allowedParentGroupTypes": ["tech.layer.infrastructure", "tech.layer.hostingOps", "tech.layer.platformServices"],
+      "allowedChildComponentTypes": ["tech.element"],
+      "version": 1
+    }
+  ]
+}

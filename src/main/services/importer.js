@@ -46,10 +46,7 @@ function parseCsv(filePath) {
  */
 export async function importApplications(filePath) {
   try {
-    console.log('[import] reading applications from:', filePath);
-
     const data = parseCsv(filePath);
-    console.log(`[import] parsed ${data.length} applications`);
 
     let imported = 0;
     for (const row of data) {
@@ -73,10 +70,8 @@ export async function importApplications(filePath) {
       imported++;
     }
 
-    console.log(`[import] ✓ imported ${imported} applications`);
     return { success: true, count: imported };
   } catch (error) {
-    console.error('[import] failed:', error?.message ?? error);
     return { success: false, error: error?.message ?? String(error) };
   }
 }
@@ -87,19 +82,11 @@ export async function importApplications(filePath) {
  */
 export async function importDependencies(filePath) {
   try {
-    console.log('[import] reading dependencies from:', filePath);
-
     const data = parseCsv(filePath);
-    console.log(`[import] parsed ${data.length} dependencies`);
 
     const sampleRow = data[0] ?? {};
     const hasStrengthColumn = Object.prototype.hasOwnProperty.call(sampleRow, 'dependency_strength');
     const hasModeColumn = Object.prototype.hasOwnProperty.call(sampleRow, 'dependency_mode');
-    console.log(
-      `[import] dependency semantics columns — strength:${hasStrengthColumn ? 'present' : 'absent'}, mode:${
-        hasModeColumn ? 'present' : 'absent'
-      }`
-    );
 
     let imported = 0;
     for (const row of data) {
@@ -111,17 +98,7 @@ export async function importDependencies(filePath) {
 
       if (!sourceId || !targetId) continue;
 
-      if (row.dependency_strength && !dependencyStrength) {
-        console.warn(
-          `[import] invalid dependency_strength for ${sourceId}->${targetId}: ${row.dependency_strength}`
-        );
-      }
-
-      if (row.dependency_mode && !dependencyMode) {
-        console.warn(
-          `[import] invalid dependency_mode for ${sourceId}->${targetId}: ${row.dependency_mode}`
-        );
-      }
+      // Invalid optional fields are treated as absent (silent).
 
       const signature = buildSignature({
         sourceId,
@@ -166,17 +143,10 @@ export async function importDependencies(filePath) {
         }
       );
 
-      if (result.length) {
-        imported++;
-      } else {
-        console.warn(`[import] skipped: ${sourceId} -> ${targetId} (apps not found)`);
-      }
+      if (result.length) imported++;
     }
-
-    console.log(`[import] ✓ imported ${imported} dependencies`);
     return { success: true, count: imported };
   } catch (error) {
-    console.error('[import] failed:', error?.message ?? error);
     return { success: false, error: error?.message ?? String(error) };
   }
 }

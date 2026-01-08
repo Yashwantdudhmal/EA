@@ -7,6 +7,22 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Silence React's devtools install hint without affecting real DevTools.
+      // React checks for this hook during initialization.
+      if (!window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+        window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
+          isDisabled: true,
+          supportsFiber: true,
+          renderers: new Map(),
+          inject() {
+            return 0;
+          },
+          onCommitFiberRoot() {},
+          onCommitFiberUnmount() {}
+        };
+      }
+    </script>
     <script type="module" src="/main.jsx"></script>
   </body>
 </html>

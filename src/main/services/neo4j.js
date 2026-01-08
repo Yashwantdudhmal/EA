@@ -12,7 +12,6 @@ const state = globalThis.__EA_NEO4J__;
 
 export async function connect() {
   if (state.connected && state.driver) {
-    console.log('[neo4j] already connected');
     return;
   }
 
@@ -20,8 +19,6 @@ export async function connect() {
   const uri = 'bolt://127.0.0.1:7687';
   const user = 'neo4j';
   const password = 'Aniruddh@123';
-
-  console.log('[neo4j] connecting to', uri, 'as', user);
 
   state.driver = neo4j.driver(
     uri,
@@ -34,7 +31,6 @@ export async function connect() {
 
   // Do NOT verifyConnectivity
   state.connected = true;
-  console.log('[neo4j] connected (hardcoded dev)');
 }
 
 export async function query(cypher, params = {}) {

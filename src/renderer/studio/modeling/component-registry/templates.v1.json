@@ -1,0 +1,33 @@
+{
+  "registryKind": "templates",
+  "registryVersion": 1,
+  "templates": [
+    {
+      "templateId": "template.webServiceWithDb",
+      "displayName": "Web Service + Database",
+      "version": 1,
+      "nodes": [
+        {
+          "localId": "svc",
+          "componentTypeId": "app.service",
+          "attributes": { "name": "Service" },
+          "position": { "x": 0, "y": 0 }
+        },
+        {
+          "localId": "db",
+          "componentTypeId": "data.database",
+          "attributes": { "name": "Database", "engine": "PostgreSQL" },
+          "position": { "x": 260, "y": 120 }
+        }
+      ],
+      "edges": [
+        {
+          "localId": "e1",
+          "sourceLocalId": "svc",
+          "targetLocalId": "db",
+          "edgeTypeId": "rel.dataFlow"
+        }
+      ]
+    }
+  ]
+}

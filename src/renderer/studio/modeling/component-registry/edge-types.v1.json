@@ -1,0 +1,36 @@
+{
+  "registryKind": "edgeTypes",
+  "registryVersion": 1,
+  "edgeTypes": [
+    {
+      "edgeTypeId": "rel.dependsOn",
+      "displayName": "Depends On",
+      "version": 1
+    },
+    {
+      "edgeTypeId": "rel.dataFlow",
+      "displayName": "Data Flow",
+      "version": 1
+    },
+    {
+      "edgeTypeId": "rel.processToApp",
+      "displayName": "Process Uses Application",
+      "version": 1
+    },
+    {
+      "edgeTypeId": "rel.programmeToCapability",
+      "displayName": "Programme Targets Capability",
+      "version": 1
+    },
+    {
+      "edgeTypeId": "rel.programmeToApplication",
+      "displayName": "Programme Funds Application",
+      "version": 1
+    },
+    {
+      "edgeTypeId": "rel.appToTechnology",
+      "displayName": "Application Runs On Technology",
+      "version": 1
+    }
+  ]
+}

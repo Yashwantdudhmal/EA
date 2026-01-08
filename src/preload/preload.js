@@ -1,13 +1,10 @@
-console.log('[preload] LOADED SUCCESSFULLY');
-
 const { contextBridge, ipcRenderer } = require('electron');
 
 function isStudioRoute() {
   try {
     const hash = globalThis?.location?.hash ?? '';
     return typeof hash === 'string' && hash.startsWith('#/studio');
-  } catch (error) {
-    console.warn('[preload] studio detection failed:', error?.message ?? error);
+  } catch {
     return false;
   }
 }
@@ -15,6 +12,12 @@ function isStudioRoute() {
 function assertEAMode(apiName) {
   if (isStudioRoute()) {
     throw new Error(`Architecture Studio is isolated from Neo4j. Blocked access via ${apiName}.`);
+  }
+}
+
+function assertStudioMode(apiName) {
+  if (!isStudioRoute()) {
+    throw new Error(`EA Snapshot import is only available in Architecture Studio. Blocked access via ${apiName}.`);
   }
 }
 
@@ -95,6 +98,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   exportStudioJson: (payload) => ipcRenderer.invoke('studio:export-json', payload),
 
   exportStudioPng: (payload) => ipcRenderer.invoke('studio:export-png', payload),
+
+  getEaSnapshot: () => {
+    assertStudioMode('getEaSnapshot');
+    return ipcRenderer.invoke('studio:ea-snapshot:get');
+  },
 
   onMenuCommand: (callback) => {
     if (typeof callback !== 'function') return () => {};
